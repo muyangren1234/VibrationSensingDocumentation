@@ -4,6 +4,7 @@ import time
 import datetime
 import threading
 import os
+from parser_pi2mac import decode_data
 
 import copy
 import numpy as np
@@ -131,4 +132,6 @@ if __name__ == "__main__":
     time_lim = data_time
     all_receive_data(sensor_ip_list, time_lim)
     ser.close()
+    time.sleep(2)
+    decode_data(FILEPATH)
     ss= input('wait')

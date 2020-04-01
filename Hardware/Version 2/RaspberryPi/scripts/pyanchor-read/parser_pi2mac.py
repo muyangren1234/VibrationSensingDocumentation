@@ -12,7 +12,7 @@ import numpy as np
 
 bufferSize = 256
 # DATA_FOLDER = './copyFromPi/Footstep'
-DATA_FOLDER = './data/'
+DATA_FOLDER = './hw_data/'
 
 TIME_OVERFLOW = 1099511627776
 TIME_RES = 0.000015650040064103
@@ -25,12 +25,23 @@ def decode_data(data_path):
     if not os.path.exists(write_path):
         os.mkdir(write_path)
     for (dir, dirs, files) in os.walk(data_path):
+        print('1')
+        print(dir)
+        print('2')
+        print(dirs)
+        print('3')
+        print(files)
+        print('\n')
         if len(dirs) > 0:
-            read_path = read_path+ str(dirs[0]) + '/'
-            write_path = write_path + str(dirs[0]) + '/'
-            if not os.path.exists(write_path):
-                os.mkdir(write_path)
+            read_path = dir+'/' + str(dirs[0]) + '/'
 
+        else:
+            read_path = str(dir) +'/'
+
+        tmp_path = read_path.split('./hw_data')[1]
+        write_path = './decode_data' + tmp_path
+        if not os.path.exists(write_path):
+            os.makedirs(write_path)
         for file in files:
             print(file)
 

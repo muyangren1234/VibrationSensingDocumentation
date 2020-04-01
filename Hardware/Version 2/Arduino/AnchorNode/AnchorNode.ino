@@ -1,4 +1,4 @@
-/*
+ /*
  * Anchor Node: 
  * vibration sensing and synchronization
  */
@@ -53,6 +53,9 @@ byte targetTime[TSIZE];
 byte separator[SEPARATOR_SIZE] = {0xFF,0xFF};
 byte separator2[SEPARATOR_SIZE] = {0xFE,0xFE};
 int counter = 0;
+short package_num = 10000;
+byte pack_info[2];
+
 // watchdog and reset period
 unsigned long lastActivity;
 unsigned long resetPeriod = 4000;
@@ -99,7 +102,8 @@ void adc_init(){
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[ADCPIN].ulADCChannelNumber;
   ADCsync();
   ADC->AVGCTRL.reg = 0x00 ;       //no averaging
-  ADC->SAMPCTRL.reg = 0x11;
+  ADC->SAMPCTRL.reg = 0x22;
+  //ADC->SAMPCTRL.reg = 0x11;
 //  ADC->SAMPCTRL.reg = 0x00;  ; //sample length in 1/2 CLK_ADC cycles
   ADCsync();
   ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV512 | ADC_CTRLB_FREERUN | ADC_CTRLB_RESSEL_10BIT;//ADC_CTRLB_PRESCALER_DIV256
@@ -117,12 +121,34 @@ void readData(uint16_t vibData) {
 
 void fillBuffer(uint16_t vibReading) {
   if (usingBuffA) {
+    if (bufferIdx == 0){
+      bufferA[bufferIdx] = (package_num ) & 0xFF;
+      bufferIdx += 1;
+      bufferA[bufferIdx] = (package_num >>8) & 0xFF;
+      bufferIdx += 1;
+      package_num += 5;
+      if (package_num > 30000){
+        package_num = 10000;
+      }
+    }
     bufferA[bufferIdx] = vibReading & 0x00FF;
     bufferIdx += 1;
     vibReading >>= 8;
     bufferA[bufferIdx] = vibReading & 0x00FF;
     bufferIdx += 1;
+
+    
   } else {
+    if (bufferIdx == 0){
+      bufferB[bufferIdx] = (package_num ) & 0xFF;
+      bufferIdx += 1;
+      bufferB[bufferIdx] = (package_num >>8) & 0xFF;
+      bufferIdx += 1;
+      package_num += 5;
+      if (package_num > 30000){
+        package_num = 10000;
+      }
+    }
     bufferB[bufferIdx] = vibReading & 0x00FF;
     bufferIdx += 1;
     vibReading >>= 8;
@@ -176,6 +202,7 @@ void printTheTimestamp(unsigned long t){
 
 void printVibration() {
   SerialUSB.write(separator, SEPARATOR_SIZE);
+  
   if (usingBuffA) {
     SerialUSB.write(bufferB, BUFFER_SIZE);
   } else {
@@ -425,6 +452,7 @@ void loop() {
                   if(msgId == RESET_NETWORK) {
                       resetInactive();
                   } else if (msgId == SYNC_REQ) {
+                    SerialUSB.println("SYNC");
                       timestamp = 0; 
                       timestamp |= data[6];
                       timestamp <<= 8;
@@ -444,8 +472,8 @@ void loop() {
     /*
     * SERIAL OUTPUT PART
     */
-    if (writeLoc) {
-      writeLoc = false;
-      printVibration();
-    }
+//    if (writeLoc) {
+//      writeLoc = false;
+//      printVibration();
+//    }
 }

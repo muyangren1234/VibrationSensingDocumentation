@@ -5,6 +5,7 @@ import datetime
 import threading
 import os
 from parser_pi2mac import decode_data
+import random
 
 import copy
 import numpy as np
@@ -21,7 +22,7 @@ port='COM3'
 #Linux
 #port='/dev/ttyUSB0'
 
-ser = serial.Serial('COM7', 115200)
+ser = serial.Serial('COM13', 115200)
 
 sensor_ip_list =[]
 sensor_ip_list.append('1937')
@@ -38,7 +39,7 @@ def all_receive_data(sensor_ip_list, time_lim):
     start_second = int(time.time());
 
     all_data  = []
-
+    file_tag = str(random.randint(0,100000))
     for ii in range(len(sensor_ip_list)):
         all_data.append([])  #initial data list
         all_data[ii] = ''
@@ -53,7 +54,7 @@ def all_receive_data(sensor_ip_list, time_lim):
         now_second = int(time.time())
         if (time_lim >0) & (now_second - start_second > time_lim):
             #save file
-            filename = file_date + new_min + '.txt'
+            filename = file_date + new_min + '#' + file_tag + '.txt'
             print(filename)
             writ_data = copy.deepcopy(all_data)
             threading.Thread(target=save_file, args=(sensor_ip_list, filename,writ_data,)).start()
@@ -61,7 +62,7 @@ def all_receive_data(sensor_ip_list, time_lim):
        
         # save file
         if new_min != old_min:
-            filename = file_date + old_min + '.txt'
+            filename = file_date + old_min
             old_min = new_min
             file_date = time_tag[0:14]
             writ_data = copy.deepcopy(all_data)
@@ -77,12 +78,12 @@ def all_receive_data(sensor_ip_list, time_lim):
         if (n):
             receive_data = ser.read(n)
             
-            client_address=['1937'];
+            client_address=[sensor_ip_list[0]]
             data_flag = True
             time_tag = get_time_tag()
         else:
             receive_data =[]
-            client_address=['1937']
+            client_address=[sensor_ip_list[0]]
             data_flag = False
         
         t1 = time.clock()

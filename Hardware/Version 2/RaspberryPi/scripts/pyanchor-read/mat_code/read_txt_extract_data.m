@@ -1,4 +1,4 @@
-function all_data = read_txt_extract_data(data_path ,sensor, date, hour, min)
+function all_data = read_txt_extract_data(data_path ,sensor, append,date, hour, min)
 %date = '2018-04-23';
 %hour = '13';
 %start_min = 41;
@@ -24,7 +24,7 @@ all_data=[];
     else
         strmin = int2str(min);
     end
-    tmpfilename = strcat(file_path,date,'_', hour, '-', strmin, '.txtout.txt')
+    tmpfilename = strcat(file_path,date,'_', hour, '-', strmin, append ,'.txtout.txt')
     
     if exist(tmpfilename, 'file') ==0
         all_data =0;
